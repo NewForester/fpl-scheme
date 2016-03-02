@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+    <!-- scheme notes by NewForester is licensed under a Creative Commons Attribution-ShareAlike 4.0 International Licence. -->
+<head>
+    
+<meta charset="UTF-8" /> <meta name="description" content="Notes on the Scheme programming language made while learning a bit about Functional Programming" /> <meta name="keywords" content="Scheme" /> <meta name="author" content="NewForester" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <link rel="stylesheet" href="../styles/style-sheet.css" />
+<title>
+Scheme Notes: Introduction
+</title>
+</head>
+
+<body>
+<h1 id="scheme">Scheme</h1>
+<h2 id="introduction">Introduction</h2>
+<p>Scheme was chosen for study because there are those that describe it as the easiest Functional Programming language to learn.</p>
+<p>Scheme is one of the two main dialects of Lisp. It follows a minimalist design philosophy with a small standard core and powerful tools for language extension.</p>
+<p>The language first appeared in 1970 and with it some of the terms common to Functional Programming languages.</p>
+<p>There is an official IEEE standard but divergence between implementations are such that Scheme has been described by its own Steering Committee as the world's least portable programming language.</p>
+<p>The most widely implemented standard is R<sub>5</sub>RS from 1998; the most recent is R<sub>7</sub>RS from 2013.</p>
+<p>The language features functional, procedural and meta programming. It has strong dynamic typing and uses lexical scope. Syntactically it uses lots of parentheses and little else. The lambda keyword is used heavily.</p>
+<h3 id="mit-scheme">MIT-Scheme</h3>
+<p>The original Scheme language was developed at MIT. MIT-Scheme pre-dates the FSF and the GPL but is now MIT/GNU Scheme.</p>
+<p>The current version is 9.2 from May 2014. It is not fully R<sub>5</sub>RS compliant. There are plans to implement the minimalist R<sub>7</sub>RS standard and a module system.</p>
+<p>It features a rich run-time library, a powerful source-level debugger, a native code compiler and the built-in emacs like editor called Edwin.</p>
+<p>The only one of these I may have used is the run-time library. None were covered in the course I followed and Edwin was not viewed favourably.</p>
+<p>Documentation is available on-line:</p>
+<ol style="list-style-type: decimal">
+<li><a href="http://www.gnu.org/software/mit-scheme/documentation/mit-scheme-user/">MIT/GNU Scheme User's Manual</a></li>
+<li><a href="http://www.gnu.org/software/mit-scheme/documentation/mit-scheme-ref/">MIT/GNU Scheme Reference</a></li>
+</ol>
+<p>There are for Version 9.2 based on R<sub>4</sub>RS.</p>
+<p>The install description is very brief and straight forward but the web page instructions are required. There is a &quot;scheme.ini&quot; file somewhere where settings can be customised.</p>
+<h3 id="user-interface">User Interface</h3>
+<p>Scheme has an command line interpreter or <code>read-eval-print loop</code>. Input is in the form of S-expressions.</p>
+<p>The S stands for symbolic, not Scheme, but the idea of expressions represented by nested, tree-structured, lists originated with Lisp.</p>
+<p>It has no special characters (so not APL-like). It uses parentheses a great deal but very few other punctuation characters.</p>
+<p>Backspace may used to erase characters. Arrow keys are not recognised. I have yet to find how to invoke the editor Edwin.</p>
+<p>For future reference:</p>
+<ol style="list-style-type: decimal">
+<li><code>^C h</code> for help</li>
+<li><code>^C q</code> to quit</li>
+<li><code>^C^C</code> cancel bad input and start again</li>
+</ol>
+<p>The command line interprets S-expressions, which is bewildering first time in.</p>
+<ol style="list-style-type: decimal">
+<li>1 + 1 ; simply does not work</li>
+<li>(+ 1 1) ; is that you should type</li>
+<li>; indicates the rest of the line is a comment</li>
+</ol>
+<p>When something goes wrong, execution is suspended. To simply clear and try again enter:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (RESTART <span class="dv">1</span>)</code></pre>
+<p>There are more advanced options but I have not tried them.</p>
+<p>Take note that:</p>
+<ol style="list-style-type: decimal">
+<li>1+ is a valid function name, so</li>
+<li>a single space is significant in many contexts</li>
+<li>extra white space and line breaks are of no significance</li>
+<li>hit return by mistake and the interpreter just sits there waiting for you to complete your input</li>
+</ol>
+<p>The contents of files (that define functions etc.) are interpreted as they are read in. It is possible to compile them and afterwards read in the compiled form.</p>
+<h3 id="xunit-test-framework">xUnit Test Framework</h3>
+<p>I looked for a xUnit test framework for Scheme and found <a href="http://schematics.sourceforge.net/schemeunit/">SchemeUnit</a>. It dates from 2003 and is aimed at PLT Scheme now named <a href="http://racket-lang.org/">Racket</a>.</p>
+<p>The source should be available from <a href="https://sourceforge.net/projects/schematics/">SourceForge</a>. I would not expect it to just work.</p>
+<h3 id="scheme-tutorial">Scheme Tutorial</h3>
+<p>An Internet search for MIT-Scheme based tutorials turned up this <a href="http://www.shido.info/lisp/idx_scm_e.html">Yet Another Scheme Tutorial</a>.</p>
+<p>It seems to have been written in 2006 but, since MIT-Scheme has little changed in that time, this is not important.</p>
+<p>The author claims this is a simple tutorial for beginners. The author says there are many other tutorials but these assume too much of the reader.</p>
+<p>It covers Scheme in 18 chapters, which is perhaps evidence of the language minimalist approach. Its aim is the provide a starting point for reading <a href="http://mitpress.mit.edu/sicp/">SICP</a>, a famous text book on Computer Science. I was impressed by this approach although I might have appreciated something more pragmatic.</p>
+<p>The tutorial is in English but the author (T. Shido) I believe is Japanese. It is clear the text has not been proof read by a native English speaker and there are sentences that I could not make sense of without researching the topic at hand elsewhere.</p>
+<p>Notwithstanding, some chapters are much more difficult than others. Chapter 7 on Repetition or Looping took a lot more effort that its predecessors. I also found the last four difficult to grok.</p>
+<p>Shido himself does not believe that Scheme is suitable for writing &quot;practical applications&quot; and suggests that Common Lisp is.</p>
+</body>
+</html>
+
+
