@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+    <!-- scheme notes by NewForester is licensed under a Creative Commons Attribution-ShareAlike 4.0 International Licence. -->
+<head>
+    
+<meta charset="UTF-8" /> <meta name="description" content="Notes on the Yet Another Scheme Introduction tutorial" /> <meta name="keywords" content="Scheme" /> <meta name="author" content="NewForester" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <link rel="stylesheet" href="../styles/style-sheet.css" />
+<title>
+Scheme Notes: Using Scheme as a Calculator
+</title>
+</head>
+
+<body>
+<h1 id="scheme">Scheme</h1>
+<h2 id="using-scheme-as-a-calculator">Using Scheme as a Calculator</h2>
+<p>Scheme expressions are call S-expressions.</p>
+<p>The basic sum is expressed this:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">+</span> <span class="dv">1</span> <span class="dv">1</span>)</code></pre>
+<p>So, parentheses around operator following by operands.</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">+</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>)</code></pre>
+<p>Evaluates to sum of 1, 2 and 3.</p>
+<p>Parentheses can be use to alter the order of evaluation:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">/</span> (<span class="kw">+</span> <span class="dv">6</span> <span class="dv">4</span>) (<span class="kw">-</span> <span class="dv">7</span> <span class="dv">2</span>))</code></pre>
+<hr /><!-- Numeric Types -->
+
+<p>Integer arithmetic produces exact results:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">/</span> <span class="dv">101</span> <span class="dv">13</span>)</code></pre>
+<p>yields <code>101/3</code> (a fractional number) rather than truncating to the nearest integer.</p>
+<p>Floating point produces inexact results:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">/</span> <span class="dv">101</span>. <span class="dv">13</span>.)</code></pre>
+<p>yields <code>7.769230769230769.</code></p>
+<p>There are functions that perform type conversions:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">exact-&gt;inexact</span> <span class="dv">1</span>/<span class="dv">2</span>)</code></pre>
+<p>yields <code>.5</code>.</p>
+<p>Scheme has a good many type conversion functions with names with the form from-&gt;to.</p>
+<p>Complex numbers are also permitted:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (* <span class="dv">1</span>+1i <span class="dv">1</span>-1i)       <span class="co">; *)</span></code></pre>
+<p>yields <code>2</code> and</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">sqrt</span> -<span class="dv">1</span>)</code></pre>
+<p>yields <code>+i</code>.</p>
+<hr /><!-- Arithmetic Operations -->
+
+<p>The basic arithmetic functions: <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>.</p>
+<p>Here are four more: <code>quotient</code>, <code>remainder</code>, <code>modulo</code>, <code>sqrt</code>.</p>
+<p>There are trigonometric functions: <code>sin</code>, <code>cos</code>, <code>tan</code>, <code>asin</code>, <code>acos</code>, <code>atan</code>.</p>
+<p>For example:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">   (* <span class="dv">4</span> (<span class="kw">atan</span> <span class="fl">1.0</span>))     <span class="co">; *)</span></code></pre>
+<p>yields 3.141592653589793.</p>
+<p>There are exponential and power functions: <code>exp</code>, <code>log</code> and <code>expt</code>.</p>
+<p>The last of these takes two parameters.</p>
+</body>
+</html>
+
+
