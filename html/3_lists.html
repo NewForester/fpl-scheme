@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+    <!-- scheme notes by NewForester is licensed under a Creative Commons Attribution-ShareAlike 4.0 International Licence. -->
+<head>
+    
+<meta charset="UTF-8" /> <meta name="description" content="Notes on the Yet Another Scheme Introduction tutorial" /> <meta name="keywords" content="Scheme" /> <meta name="author" content="NewForester" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <link rel="stylesheet" href="../styles/style-sheet.css" />
+<title>
+Scheme Notes: Making Lists
+</title>
+</head>
+
+<body>
+<h1 id="scheme">Scheme</h1>
+<h2 id="making-lists">Making Lists</h2>
+<p>At heart, Scheme is Lisp and so a list processor.</p>
+<hr /><!-- Cons cells --->
+
+<p>The fundamental building block of Lisp list is the <code>cons</code> cell (for construction cell).</p>
+<p>It consists of two pointers, the, <code>car</code> and <code>cdr</code>, whose names originate with a hardware construct of the machine on which the first Lisp processor was built.</p>
+<p>The <code>car</code> references the value of this cell, while the <code>cdr</code> points to the next cell of a list. The term beaded references to cells referencing other cells.</p>
+<p>At end of a string of beaded cells, the <code>cdr</code> may also address a value and, naturally, any <code>car</code> may reference another string of beaded cells.</p>
+<p>Values that are not themselves cells are called atoms. Numbers, characters, string and vectors are all atoms as well as an empty list.</p>
+<p>The syntax for a cons cell is:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">cons</span> <span class="dv">1</span> <span class="dv">2</span>)</code></pre>
+<p>which Scheme prints as:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="dv">1</span> . <span class="dv">2</span>)</code></pre>
+<p>The beading of a pair of cons cells might look like:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">cons</span> <span class="dv">3</span> (<span class="kw">cons</span> <span class="dv">1</span> <span class="dv">2</span>))</code></pre>
+<p>A list is a string of beaded <code>const</code> cells where the <code>cdr</code> part of the last cell is '(), the empty list.</p>
+<p>The definition is recursive:</p>
+<ol style="list-style-type: decimal">
+<li>'() is a list</li>
+<li>if ls is a list and obj is data of any kind, then (cons obj ls) is a list</li>
+</ol>
+<p>This makes list essentially LIFO data structures.</p>
+<hr /><!-- Aside on Quote and Special Forms --->
+
+<p>Why the apostrophe in:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    &#39;()                         <span class="co">; represents an empty list</span>
+    &#39;(<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>)                    <span class="co">; represents the list 1 2 3</span></code></pre>
+<p>Scheme evaluation rules mean that it tries to evaluate whatever occurs between parentheses. The number 1 evaluates to 1 so you get what you want but (1 2 3) looks to Scheme like a request to apply a function named 1 to the arguments 2 and 3.</p>
+<p>To stop this happening you need to quote the parenthesised expression:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (quote ())                  <span class="co">; represents an empty list</span>
+    (quote (<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>))             <span class="co">; represents the list 1 2 3</span></code></pre>
+<p>The apostrophe is simply shorthand for a very common expression.</p>
+<p>Also note that <code>quote</code> is one a limited number of 'special forms' that are used like functions but which aren't because they do not evaluate all their arguments. Most of the time the distinction is not obvious but the special forms are the Scheme analogue of reserved keywords in other languages.</p>
+<hr /><!-- List Functions --->
+
+<p>The <code>list</code> function will take an arbitrary number of arguments and return them as a list:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">list</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">4</span>)              <span class="co">; a list of the first four natural number</span>
+    &#39;(<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">4</span>)                  <span class="co">; ditto - the usual way of entering a list</span>
+
+    (<span class="kw">list</span>)                      <span class="co">; an empty list</span>
+    &#39;()                         <span class="co">; ditto - the usual way of denoting an empty list</span>
+
+    (<span class="kw">list</span> &#39;(<span class="dv">1</span> <span class="dv">2</span>) &#39;(<span class="dv">3</span> <span class="dv">4</span>))        <span class="co">; a list comprising two lists of two number each</span></code></pre>
+<p>The <code>car</code> and <code>cdr</code> functions return the two parts of a cons cell.</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">car</span> &#39;(<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">4</span>))            <span class="co">; returns 1</span>
+
+    (<span class="kw">cdr</span> &#39;(<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">4</span>))            <span class="co">; return (2 3 4)</span></code></pre>
+<p>These functions are important for list traversal</p>
+</body>
+</html>
+
+
