@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+    <!-- scheme notes by NewForester is licensed under a Creative Commons Attribution-ShareAlike 4.0 International Licence. -->
+<head>
+    
+<meta charset="UTF-8" /> <meta name="description" content="Notes on the Yet Another Scheme Introduction tutorial" /> <meta name="keywords" content="Scheme" /> <meta name="author" content="NewForester" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <link rel="stylesheet" href="../styles/style-sheet.css" />
+<title>
+Scheme Notes: Conditional Evaluation
+</title>
+</head>
+
+<body>
+<h1 id="scheme">Scheme</h1>
+<h2 id="conditional-evaluation">Conditional Evaluation</h2>
+<p>In Scheme, the Boolean values true and false are represented by <code>#t</code> and <code>#f</code>.</p>
+<hr /><!-- Conditional Expressions -->
+
+<p>The <code>if</code> special form is the primary mean of achieving conditional evaluation.</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">if</span> predicate then_value else_value)</code></pre>
+<p>The predicate is evaluated:</p>
+<ol style="list-style-type: decimal">
+<li>if false, the else_value is evaluated</li>
+<li>otherwise the result is taken to be true and the then_value is evaluated</li>
+<li>only one of then_value and else_value is evaluated</li>
+<li>the result of the <code>if</code> expression is the result of whichever is evaluated</li>
+<li>each is a single S-expression</li>
+<li>the else_value may be omitted but then the <code>if</code> expression result may be undefined</li>
+<li>if you need the result to be false then use an explicit <code>#f</code></li>
+</ol>
+<p>Note, in MIT-Scheme, <code>#f</code> and <code>'()</code> (the empty list) are both false but do not rely on this as under R<sub>5</sub>RS they are not. Use the <code>null?</code> predicate instead (see below).</p>
+<p>The <code>not</code> function may be used to negate predicates:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">if</span> (<span class="kw">not</span> predicate) then_value else_value)</code></pre>
+<p>The <code>and</code> and <code>or</code> expressions (special forms ?) may be used to combine predicate conditions.</p>
+<ol style="list-style-type: decimal">
+<li>each takes an arbitrary number of arguments</li>
+<li>an <code>and</code> expression returns <code>#f</code> if one of its arguments evaluates to false otherwise is returns the value of its last argument.</li>
+<li>an <code>or</code> expression returns the value of the first argument that does not evaluate to false or <code>#f</code> is they all do.</li>
+<li>arguments are evaluated left to right until a result is obtained.</li>
+</ol>
+<p>The <code>cond</code> expression generalises branching:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">cond</span>
+      (predicate_1 clause_1)
+      (predicate_2 clause_2)
+           ...
+      (predicate_n clause_n)
+      (<span class="kw">else</span>  clause_else))</code></pre>
+<ol style="list-style-type: decimal">
+<li>predicates are evaluated top to bottom until one does not evaluate to false or the <code>else</code> predicate is reached</li>
+<li>the corresponding clause is then evaluated</li>
+<li>a clause may consist of more than one S-expression</li>
+<li>the result of the <code>cond</code> expression is the result of evaluating the last S-expression of the clause.</li>
+</ol>
+<hr /><!-- Predicates -->
+
+<p>Scheme has rich set of predicates. All have names that end in <code>?</code>.</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">eq?</span> a b)           <span class="co">; true iff a and b are the same object</span>
+    (<span class="kw">eqv?</span> a b)          <span class="co">; true iff a and b are of the same type and have the same atomic value</span>
+    (<span class="kw">equal?</span> a b)        <span class="co">; true iff a and b are equal lists or strings (sequences)</span></code></pre>
+<p>Predicates that check data types are:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">pair?</span> x)           <span class="co">; true if x is one or more a `cons` cells</span>
+    (<span class="kw">list?</span> x)           <span class="co">; true if x is a list - &#39;() is a list but not a pair</span>
+    (<span class="kw">null?</span> x)           <span class="co">; true if x is the empty list &#39;()</span>
+    (<span class="kw">symbol?</span> x)         <span class="co">; true if x is a symbol</span>
+    (<span class="kw">char?</span> x)           <span class="co">; true if x is a character</span>
+    (<span class="kw">string?</span> x)         <span class="co">; true if x is a string</span>
+    (<span class="kw">number?</span> x)         <span class="co">; true if x is any kind of number</span>
+    (<span class="kw">complex?</span> x)        <span class="co">; true if x is a complex number</span>
+    (<span class="kw">real?</span> x)           <span class="co">; true if x is a real number</span>
+    (<span class="kw">rational?</span> x)       <span class="co">; true if x is a rational number</span>
+    (<span class="kw">integer?</span> x)        <span class="co">; true if x is an integer</span>
+    (<span class="kw">exact?</span> x)          <span class="co">; true if x is not a floating point number</span>
+    (<span class="kw">inexact?</span> x)        <span class="co">; true if x is a floating pointer number</span></code></pre>
+<p>Presumably a number can be both complex and rational.</p>
+<p>The predicates that compare numbers are: <code>=</code>, <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code>. These take an arbitrary number of arguments and return <code>#t</code> if the arguments are suitably ordered. Wow. They do what you would expect.</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">&gt;</span> <span class="dv">1</span> -<span class="dv">0</span> -<span class="dv">1</span>)
+    <span class="co">;Value: #t</span></code></pre>
+<p>How this works for complex numbers is not said.</p>
+<p>These predicates take only one parameter:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">odd?</span> x)            <span class="co">; true if x is an odd number</span>
+    (<span class="kw">even?</span> x)           <span class="co">; true if x is an even number</span>
+    (<span class="kw">positive?</span> x)       <span class="co">; true if x is greater than 0</span>
+    (<span class="kw">negative?</span> x)       <span class="co">; true if x is less than 0</span>
+    (<span class="kw">zero?</span> x)           <span class="co">; true if x is zero</span></code></pre>
+<p>Scheme has a great many more type specific predicates some of which are introduced later in these notes.</p>
+</body>
+</html>
+
+
