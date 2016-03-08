@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+    <!-- scheme notes by NewForester is licensed under a Creative Commons Attribution-ShareAlike 4.0 International Licence. -->
+<head>
+    
+<meta charset="UTF-8" /> <meta name="description" content="Notes on the Yet Another Scheme Introduction tutorial" /> <meta name="keywords" content="Scheme" /> <meta name="author" content="NewForester" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <link rel="stylesheet" href="../styles/style-sheet.css" />
+<title>
+Scheme Notes: Local Variables
+</title>
+</head>
+
+<body>
+<h1 id="scheme">Scheme</h1>
+<h2 id="local-variables">Local Variables</h2>
+<p>Local variables ease the definition of complex functions. Scheme provides a mechanism through eye candy and <code>lambda</code> functions.</p>
+<p>Consider:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    ((<span class="kw">lambda</span> (p1 p2 ...)
+      exp1 exp2 ...) v1 v2 ...)</code></pre>
+<p>By definition, parameters p1, p2 ... are assigned the values v1, v2, ... and the assignments are in scope during the evaluation of expr1, expr2, ...</p>
+<p>Thus:</p>
+<p><code>scheme     (let ((p1 v1) (p2 v2) ...) exp1 exp2 ...)</code> may been seen as eye candy: the local variables p1, p2 ... are assigned the values v1, v2, ... and the assignments are in scope during the evaluation of expr1, expr2, ...</p>
+<p>This definition of scope means that the value v2, for example, cannot be an expression that involves p1. It is always possible to nest <code>let</code> expressions:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">let</span> ((i <span class="dv">1</span>))
+      (<span class="kw">let</span> ((j (<span class="kw">+</span> i <span class="dv">2</span>)))
+      (* i j)))                         <span class="co">; *)</span></code></pre>
+<p>but this is cumbersome.</p>
+<p>Further eye-candy allows this to expressed as:</p>
+<pre><code>    (let* ((i 1) (j (+ i 2)))
+      (* i j))                          ; *)</code></pre>
+<p>The scope of the <code>lambda</code> function (or the <code>let</code> expression) is referred to as the lexical closure. Good luck with all the parentheses.</p>
+</body>
+</html>
+
+
