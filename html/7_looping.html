@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+    <!-- scheme notes by NewForester is licensed under a Creative Commons Attribution-ShareAlike 4.0 International Licence. -->
+<head>
+    
+<meta charset="UTF-8" /> <meta name="description" content="Notes on the Yet Another Scheme Introduction tutorial" /> <meta name="keywords" content="Scheme" /> <meta name="author" content="NewForester" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <link rel="stylesheet" href="../styles/style-sheet.css" />
+<title>
+Scheme Notes: Looping and Recursion
+</title>
+</head>
+
+<body>
+<h1 id="scheme">Scheme</h1>
+<h2 id="looping-and-recursion">Looping and Recursion</h2>
+<p>This is a difficult topic.</p>
+<p>In Scheme, repetition is usually handled by recursion although <code>do</code> expressions provide the iterative alternative.</p>
+<p>One reason for recursion is the use of lists and a list is essentially a recursive data structure. Here recursion used to process a list. It returns a new list where each element is twice that of the original list:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">define</span><span class="fu"> </span>(list*<span class="dv">2</span> ls)
+      (<span class="kw">if</span> (<span class="kw">null?</span> ls)
+        &#39;()
+        (<span class="kw">cons</span> (* <span class="dv">2</span> (<span class="kw">car</span> ls))            <span class="co">; *)</span>
+          (list*<span class="dv">2</span> (<span class="kw">cdr</span> ls)))))</code></pre>
+<p>Another simple example:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">   (<span class="kw">define</span><span class="fu"> </span>(factorial n)
+     (<span class="kw">if</span> (<span class="kw">=</span> n <span class="dv">1</span>)
+       <span class="dv">1</span>
+       (* n (fact (<span class="kw">-</span> n <span class="dv">1</span>)))))           <span class="co">; *)</span></code></pre>
+<p>This arrangement is inefficient. It maximises stack usage. The intermediary result is factorial n-1, which seems natural, but means keeping the stack context of each level until the lowest level is reached.</p>
+<hr /><!-- Tail Recursions -->
+
+<p>A technique called tail recursion can be used to avoid this.</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">define</span><span class="fu"> </span>(fact-tail n)
+      (fact-rec n n))
+
+    (<span class="kw">define</span><span class="fu"> </span>(fact-rec n p)
+      (<span class="kw">if</span> (<span class="kw">=</span> n <span class="dv">1</span>)
+        p
+        (<span class="kw">let</span> ((m (<span class="kw">-</span> n <span class="dv">1</span>)))
+          (fact-rec m (* p m)))))       <span class="co">; *)</span></code></pre>
+<p>In terms of calculation, the first example does 1 * 2 * 3 ... while this example does n * n-1 * n-2 ...</p>
+<p>The recursive call is the very last thing the function does so no stack context need be maintained. The compiler can turn the recursion into a loop.</p>
+<p>This does require a second parameter in lieu of the stack context. It, inconveniently, requires two routines.</p>
+<hr /><!-- Named Tail Recursions -->
+
+<p>The named <code>let</code> offers a way of implementing tail recursion within a single routine:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">define</span><span class="fu"> </span>(fact-let n)
+      (<span class="kw">let</span> loop((n1 n) (p n))
+        (<span class="kw">if</span> (<span class="kw">=</span> n1 <span class="dv">1</span>)
+          p
+          (<span class="kw">let</span> ((m (<span class="kw">-</span> n1 <span class="dv">1</span>)))
+            (loop m (* p m))))))        <span class="co">; *)</span></code></pre>
+<p>Here the <code>let</code> is named 'loop' but the named has no meaning to the compiler.</p>
+<p>An alternative is <code>letrec</code> (recursive let), which allows the declaration of a local variable that can refer to itself. This uses a recursive <code>lambda</code> function: the local variable, in effect, gives the lambda function a local name.</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">define</span><span class="fu"> </span>(fact-letrec n)
+      (<span class="kw">letrec</span> (
+        (iter (<span class="kw">lambda</span> (n1 p)
+          (<span class="kw">if</span> (<span class="kw">=</span> n1 <span class="dv">1</span>)
+            p
+            (<span class="kw">let</span> ((m (<span class="kw">-</span> n1 <span class="dv">1</span>)))
+              (iter m (* p m)))))))     <span class="co">; *)</span>
+        (iter n n)))</code></pre>
+<hr /><!-- Iterative Loops -->
+
+<p>The <code>do</code> expression is not used very often. Some say it is less clear than recursion.</p>
+<p>The definition is:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">do</span> binds (predicate value) body)</code></pre>
+<p>Variables are bound in the 'binds' part and the 'predicate' is evaluated. If true, the loop terminates and the final result is the result of evaluating 'body'. Otherwise the variables are rebound and the predicate re-evaluated.</p>
+<p>The <code>binds</code> part has the form:</p>
+<p><code>scheme     ((p1 i1 u1) (p2 i2 u2) ...)</code> where p1 ... are the names of local variables, i1 ... the initial values and u1 ... the update values.</p>
+<p>The factorial may be expressed thus:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">   <span class="kw">define</span><span class="fu"> </span>(fact-do n)
+     (<span class="kw">do</span> (
+       (n1 n (<span class="kw">-</span> n1 <span class="dv">1</span>))
+       (p n (* p (<span class="kw">-</span> n1 <span class="dv">1</span>))))            <span class="co">; *)</span>
+       ((<span class="kw">=</span> n1 <span class="dv">1</span>)
+       p)))</code></pre>
+<p>In this case, the loop is all in the 'binds' part and the 'body' simply returns the result.</p>
+</body>
+</html>
+
+
