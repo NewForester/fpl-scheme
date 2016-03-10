@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+    <!-- scheme notes by NewForester is licensed under a Creative Commons Attribution-ShareAlike 4.0 International Licence. -->
+<head>
+    
+<meta charset="UTF-8" /> <meta name="description" content="Notes on the Yet Another Scheme Introduction tutorial" /> <meta name="keywords" content="Scheme" /> <meta name="author" content="NewForester" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <link rel="stylesheet" href="../styles/style-sheet.css" />
+<title>
+Scheme Notes: Higher Order Functions
+</title>
+</head>
+
+<body>
+<h1 id="scheme">Scheme</h1>
+<h2 id="higher-order-functions">Higher Order Functions</h2>
+<p>Higher Order Functions are functions that take functions as arguments or return them.</p>
+<p>Higher order functions may be used to promote modularity. For example, a sort operation involves the data to be sorted, the sort algorithm (e.g. quick sort) and the ordering function.</p>
+<p>Separating the ordering function from the sort algorithm is an example of modularity that is possible with higher order functions. It also improves readability since recursive algorithms are called, instead of implemented, many times.</p>
+<p>Scheme does not distinguish between values and functions (or data structures and procedures), which means you can create your own higher order functions by simply passing functions to other functions. This is what is meant by 'functions are first class citizens'.</p>
+<p>Higher order functions are a integral part of the language. Scheme does not have a block structured syntax. Programmers tend to use lambda expressions as blocks. These 'anonymous' functions and also, in effect, higher order functions.</p>
+<hr /><!-- Mapping -->
+
+<p>R<sub>5</sub>RS defines two mapping functions:</p>
+<ol style="list-style-type: decimal">
+<li><code>map</code> - generates a list from one or more lists</li>
+<li><code>for-each</code> - generates side effects of each item in a list</li>
+</ol>
+<p><!-- --> The general form of the <code>map</code> function is:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (map procedure list1 list2 ...)</code></pre>
+<p>The <code>procedure</code> is a symbol bound to a function or a lambda expression. There will be a list argument for each parameter of <code>procedure</code>.</p>
+<!-- -->
+
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (map <span class="kw">+</span> &#39;(<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>) &#39;(<span class="dv">4</span> <span class="dv">5</span> <span class="dv">6</span>))</code></pre>
+<p>will produce a list of sums.</p>
+<p><!-- --> <code>scheme     (map (lambda (x) (* x x)) '(1 2 3)) ; *)</code></p>
+<p>will produce a list of squares.</p>
+<p><!-- --> The general form of the <code>for-each</code> function is the same as for <code>map</code> but it does not return a value. It is typically be used for output or other side effects.</p>
+<hr /><!-- Filtering -->
+
+<p>MIT-Scheme defines two filter functions:</p>
+<ol style="list-style-type: decimal">
+<li><code>keep-matching-items</code> - retain list items that satisfy a predicate</li>
+<li><code>delete-matching-items</code> - retain list items that do not satisfy a predicate</li>
+</ol>
+<p>These functions take a list and a predicate as first and second arguments.</p>
+<p><!-- --> <code>scheme     (keep-matching-items '(1 2 -3 -4 5) positive?)</code></p>
+<hr /><!-- Folding -->
+
+<p>MIT-Scheme defines two folding functions:</p>
+<ol style="list-style-type: decimal">
+<li><code>reduce</code> - <code>(reduce proc acc list)</code></li>
+<li><code>apply</code> - <code>(apply proc [int ...] list)</code></li>
+</ol>
+<p><!-- --> The classic use of <code>reduce</code> is to sum the elements in a list:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (reduce <span class="kw">+</span> <span class="dv">0</span> &#39;(<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">4</span>))     <span class="co">; yields 10</span></code></pre>
+<p>The initial value for the accumulator is zero.</p>
+<p>The classic use of <code>apply</code> is to pass a list to a function that expects an atom sequence:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (apply <span class="kw">max</span> <span class="dv">6</span> <span class="dv">7</span> &#39;(<span class="dv">10</span> <span class="dv">9</span> <span class="dv">8</span>))      <span class="co">; yields 10</span></code></pre>
+<hr /><!-- Sorting -->
+
+<p>MIT-Scheme provides two sorting functions:</p>
+<ol style="list-style-type: decimal">
+<li><code>sort</code> - an implementation of the merge sort algorithm</li>
+<li><code>quick-sort</code> - an implementation of the quick sort algorithm</li>
+</ol>
+<p><!-- --> <code>scheme     (sort '(3 5 1 4 -1) &lt;)</code></p>
+<p>These functions take a list and a predicate as first and second arguments.</p>
+<hr /><!-- Making Higher Order Functions -->
+
+<p>Here is a quick example of a code-it-yourself higher order function that returns a sub-list starting with the first element that satisfies the predicate:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">define</span><span class="fu"> </span>(member-if predicate ls)
+      (<span class="kw">cond</span>
+        ((<span class="kw">null?</span> ls) <span class="dv">#f</span>)
+        ((predicate (<span class="kw">car</span> ls)) ls)
+        (<span class="kw">else</span> (member-if predicate (<span class="kw">cdr</span> ls)))))</code></pre>
+<p><!-- --> Here is another that returns a sub-list of <code>ls</code> that starts with the first element that matches the criterion <code>obj</code> according to the condition <code>proc</code>:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">define</span><span class="fu"> </span>(<span class="kw">member</span> proc obj ls)
+      (<span class="kw">cond</span>
+      ((<span class="kw">null?</span> ls) <span class="dv">#f</span>)
+      ((proc obj (<span class="kw">car</span> ls)) ls)
+      (<span class="kw">else</span> (<span class="kw">member</span> proc obj (<span class="kw">cdr</span> ls)))))</code></pre>
+<p><!-- --> The solution to the second question of exercise 6 is important for it introduces another trick. It involves transposing lists, something that at first glance was not obvious. My notes on the solution are in <a href="../scm/lesson8-example6.scm">lesson8-example6.scm</a></p>
+</body>
+</html>
+
+
