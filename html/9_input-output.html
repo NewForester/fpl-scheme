@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+    <!-- scheme notes by NewForester is licensed under a Creative Commons Attribution-ShareAlike 4.0 International Licence. -->
+<head>
+    
+<meta charset="UTF-8" /> <meta name="description" content="Notes on the Yet Another Scheme Introduction tutorial" /> <meta name="keywords" content="Scheme" /> <meta name="author" content="NewForester" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <link rel="stylesheet" href="../styles/style-sheet.css" />
+<title>
+Scheme Notes: Input and Output
+</title>
+</head>
+
+<body>
+<h1 id="scheme">Scheme</h1>
+<h2 id="input-and-output">Input and Output</h2>
+<p>Without the ability to read and write files the interactive front end of Scheme is just a toy.</p>
+<p>The functions to open and close files are:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">open-input-file</span> filename)
+    (<span class="kw">open-output-file</span> filename)
+
+    (<span class="kw">close-input-port</span> port)
+    (<span class="kw">close-output-port</span> port)</code></pre>
+<p>The open functions return a <code>port</code>, which is passed to other input/output routines. The <code>filename</code> is operating system dependent.</p>
+<hr /><!-- Input -->
+
+<p>An input file may be read a single character at a time:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">define</span><span class="fu"> </span>(read-file file-name)
+      (<span class="kw">let</span> ((p (<span class="kw">open-input-file</span> file-name)))
+      (<span class="kw">let</span> loop((ls1 &#39;()) (c (<span class="kw">read-char</span> p)))
+        (<span class="kw">if</span> (<span class="kw">eof-object?</span> c)
+          (<span class="kw">begin</span>
+            (<span class="kw">close-input-port</span> p)
+            (<span class="kw">list-&gt;string</span> (<span class="kw">reverse</span> ls1)))
+          (loop (<span class="kw">cons</span> c ls1) (<span class="kw">read-char</span> p))))))</code></pre>
+<p>Evaluating this function on a file will print one long string with <code>\n</code> to denote line breaks. Use <code>display</code> to, in effect, <code>cat</code> the file.</p>
+<p>Two other functions are used more often because they handle errors such as file-not-found for you:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">call-with-input-file</span> filename procedure)
+    (<span class="kw">with-input-from-file</span> filename procedure)</code></pre>
+<p>The first passes the <code>port</code> to the <code>procedure</code>, which is responsible for closing the file.</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">  (<span class="kw">define</span><span class="fu"> </span>(read-file file-name)
+    (<span class="kw">call-with-input-file</span> file-name
+      (<span class="kw">lambda</span> (p)
+        (<span class="kw">let</span> loop((ls1 &#39;()) (c (<span class="kw">read-char</span> p)))
+          (<span class="kw">if</span> (<span class="kw">eof-object?</span> c)
+            (<span class="kw">begin</span>
+              (<span class="kw">close-input-port</span> p)
+              (<span class="kw">list-&gt;string</span> (<span class="kw">reverse</span> ls1)))
+            (loop (<span class="kw">cons</span> c ls1) (<span class="kw">read-char</span> p)))))))</code></pre>
+<p>The second opens the file as standard input so no parameter and no close.</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">  (<span class="kw">define</span><span class="fu"> </span>(read-file file-name)
+    (<span class="kw">with-input-from-file</span> file-name
+      (<span class="kw">lambda</span> ()
+        (<span class="kw">let</span> loop((ls1 &#39;()) (c (<span class="kw">read-char</span>)))
+          (<span class="kw">if</span> (<span class="kw">eof-object?</span> c)
+            (<span class="kw">list-&gt;string</span> (<span class="kw">reverse</span> ls1))
+            (loop (<span class="kw">cons</span> c ls1) (<span class="kw">read-char</span>)))))))</code></pre>
+<p>There is a function <code>(read port)</code> that will read an S-expression.</p>
+<hr /><!-- Output -->
+
+<p>The analogous functions for output are:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">call-with-output-file</span> filename procedure)
+    (<span class="kw">with-output-to-file</span> filename procedure)</code></pre>
+<p>The simple output routines are:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">write-char</span> char port)
+    (<span class="kw">newline</span> port)</code></pre>
+<p>The slightly more interesting routines are:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">write</span> obj port)
+    (<span class="kw">display</span> obj port)</code></pre>
+<p>The first print strings in double quotes and characters have the <code>#\</code> prefix. The second does not.</p>
+</body>
+</html>
+
+
