@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+    <!-- scheme notes by NewForester is licensed under a Creative Commons Attribution-ShareAlike 4.0 International Licence. -->
+<head>
+    
+<meta charset="UTF-8" /> <meta name="description" content="Notes on the Yet Another Scheme Introduction tutorial" /> <meta name="keywords" content="Scheme" /> <meta name="author" content="NewForester" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <link rel="stylesheet" href="../styles/style-sheet.css" />
+<title>
+Scheme Notes: Assignment
+</title>
+</head>
+
+<body>
+<h1 id="scheme">Scheme</h1>
+<h2 id="assignment">Assignment</h2>
+<p>Scheme is a functional programming language: it is possible to write non-trivial programs without assignment. However, assignment is required for continuations and state and is convenient for some algorithms.</p>
+<p>The function <code>set!</code> can be used to assign a value to a previously declared symbol:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">define</span><span class="fu"> var </span><span class="dv">1</span>)
+    (set! var (<span class="kw">+</span> var <span class="dv">10</span>))</code></pre>
+<p>The exclamation mark <code>!</code> is used to warn the reader that the function modifies state.</p>
+<p>In Scheme, constructs such as <code>lambda</code>, <code>let</code> and so on involve the definition of symbols. The symbols are valid until the end of the construct that defines them. That is until the closing parenthesis of the <code>lambda</code>, <code>let</code> and so on.</p>
+<p>The symbols are said to have (static) scope or lexical closure. Lexical closure is considered a good thing.</p>
+<p>Internal state can be implemented within a lexical closure by using assignment.</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">define</span><span class="fu"> bank-account</span>
+      (<span class="kw">let</span> ((balance <span class="dv">10</span>))       <span class="co">; initial balance</span>
+        (<span class="kw">lambda</span> (n)
+        (set! balance (<span class="kw">+</span> balance n))
+        balance)))
+
+    (bank-account <span class="dv">20</span>)           <span class="co">; deposit</span>
+
+    (bank-account -<span class="dv">25</span>)          <span class="co">; withdrawal</span></code></pre>
+<p>In Scheme, as in other functional programming languages, a function can return another function complete with lexical closure.</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">define</span><span class="fu"> </span>(make-bank-account balance)
+      (<span class="kw">lambda</span> (n)
+        (set! balance (<span class="kw">+</span> balance n))
+        balance))
+
+    (<span class="kw">define</span><span class="fu"> my-bank-account </span>(make-bank-account <span class="dv">10</span>))     <span class="co">; create account with initial deposit</span>
+
+    (my-bank-account <span class="dv">50</span>)        <span class="co">; deposit</span>
+
+    (my-bank-account -<span class="dv">50</span>)       <span class="co">; withdrawal</span></code></pre>
+<p>Note that <code>set!</code> is restricted: it cannot assign a value to an S-expression, only a named variable.</p>
+<p>Note a goal of functional programming is to avoid side-effects (as these a viewed as difficult to debug). Assignment (modification of state) and I/O are both side effects.</p>
+<hr /><!-- Destructive List Operations -->
+
+<p>The functions <code>set-car!</code> and <code>set-cdr!</code> may be used to assign values to the <code>car</code> and <code>cdr</code> parts of a <code>cons</code> cell.</p>
+<p>They can be used to implement a FIFO queue. A <code>cons</code> holds pointers to the front and back of the queue, which is itself a conventional list.</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">define</span><span class="fu"> </span>(make-queue)
+      (<span class="kw">cons</span> &#39;() &#39;()))
+
+    (<span class="kw">define</span><span class="fu"> </span>(enqueue! queue obj)
+      (<span class="kw">let</span> ((lobj (<span class="kw">cons</span> obj &#39;())))
+        (<span class="kw">if</span> (<span class="kw">null?</span> (<span class="kw">car</span> queue))
+          (<span class="kw">begin</span>
+            (<span class="kw">set-car!</span> queue lobj)
+            (<span class="kw">set-cdr!</span> queue lobj))
+          (<span class="kw">begin</span>
+            (<span class="kw">set-cdr!</span> (<span class="kw">cdr</span> queue) lobj)
+            (<span class="kw">set-cdr!</span> queue lobj)))
+        (<span class="kw">car</span> queue)))
+
+    (<span class="kw">define</span><span class="fu"> </span>(dequeue! queue)
+      (<span class="kw">let</span> ((obj (<span class="kw">car</span> (<span class="kw">car</span> queue))))
+        (<span class="kw">set-car!</span> queue (<span class="kw">cdr</span> (<span class="kw">car</span> queue)))
+        obj))</code></pre>
+<p>Note that <code>set-car!</code> and <code>set-cdr!</code> can assign a value to an S-expression: there is one example above.</p>
+<p>Note: ordinary lists in Scheme are, in effect, LIFO structures.</p>
+</body>
+</html>
+
+
