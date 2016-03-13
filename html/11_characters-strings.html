@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+    <!-- scheme notes by NewForester is licensed under a Creative Commons Attribution-ShareAlike 4.0 International Licence. -->
+<head>
+    
+<meta charset="UTF-8" /> <meta name="description" content="Notes on the Yet Another Scheme Introduction tutorial" /> <meta name="keywords" content="Scheme" /> <meta name="author" content="NewForester" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <link rel="stylesheet" href="../styles/style-sheet.css" />
+<title>
+Scheme Notes: Characters and Strings
+</title>
+</head>
+
+<body>
+<h1 id="scheme">Scheme</h1>
+<h2 id="characters-and-strings">Characters and Strings</h2>
+<p>Lists and numbers are the most commonly used data types in Scheme but there are others.</p>
+<hr /><!-- Characters -->
+
+<p>Characters are indicated by the prefix <code>#\</code>: <code>#\a</code> and <code>#\A</code> representing the characters 'a' and 'A'.</p>
+<p>Four non-printing characters are also defined: <code>#\Space</code>. <code>#\Tab</code>, <code>#\Linefeed</code> and <code>#\Return</code>.</p>
+<p>A good number of functions are also available:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">char?</span> obj)                         <span class="co">; #t is obj is a character</span>
+
+    (<span class="kw">char-&gt;integer</span> c)                   <span class="co">; convert character to (ASCII) integer</span>
+    (<span class="kw">integer-&gt;char</span> c)                   <span class="co">; convert (ASCII) integer to character</span>
+
+    (<span class="kw">char=?</span> c1 c2)                      <span class="co">; #t is c1 and c2 are the same character</span>
+    (char&lt;? c1 c2)                      <span class="co">; comparison of characters after conversion to integer</span>
+                                        <span class="co">; etc.</span>
+
+    (<span class="kw">char-ci=?</span> c1 c2)                   <span class="co">; case insensitive comparison</span>
+                                        <span class="co">; etc.</span>
+
+    (<span class="kw">char-numeric?</span> c)                   <span class="co">; #t if character is a numeral</span>
+                                        <span class="co">; also alphabetic, whitespace, upper-case, lower-case</span>
+
+    (<span class="kw">char-upcase</span> c)                     <span class="co">; return upper case character</span>
+    (<span class="kw">char-downcase</span> c)                   <span class="co">; return lower case character</span></code></pre>
+<hr /><!-- Strings -->
+
+<p>String are enclosed in quotes. Thus <code>&quot;abc&quot;</code>.</p>
+<p>They are sequences of characters. The time taken to compare strings is proportional to their length.</p>
+<p>The following functions are defined:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">string?</span> s)                         <span class="co">; #t if s is a string</span>
+    (<span class="kw">make-string</span> n c)                   <span class="co">; returns a string of n characters c)</span>
+
+    (<span class="kw">string-&gt;list</span> s)                    <span class="co">; convert a string to a list of characters</span>
+    (<span class="kw">list-&gt;string</span> s)                    <span class="co">; convert list of characters to a string</span>
+
+    (<span class="kw">string-length</span> s)                   <span class="co">; eponymous</span>
+    (<span class="kw">string-copy</span> s)                     <span class="co">; eponymous</span>
+    (<span class="kw">string-append</span> s1 s2)               <span class="co">; append s2 to s1</span>
+
+    (<span class="kw">string=?</span> s1 s2)                    <span class="co">; #t if the strings are the same</span>
+
+    (<span class="kw">string-ref</span> s n)                    <span class="co">; get nth character from string (0 based)</span>
+    (<span class="kw">string-set!</span> s n c)                 <span class="co">; get nth character in string (0 based) to character</span>
+
+    (<span class="kw">substring</span> s start end)             <span class="co">; return substring [start,end)</span></code></pre>
+</body>
+</html>
+
+
