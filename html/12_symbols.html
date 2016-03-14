@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+    <!-- scheme notes by NewForester is licensed under a Creative Commons Attribution-ShareAlike 4.0 International Licence. -->
+<head>
+    
+<meta charset="UTF-8" /> <meta name="description" content="Notes on the Yet Another Scheme Introduction tutorial" /> <meta name="keywords" content="Scheme" /> <meta name="author" content="NewForester" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <link rel="stylesheet" href="../styles/style-sheet.css" />
+<title>
+Scheme Notes: Symbols
+</title>
+</head>
+
+<body>
+<h1 id="scheme">Scheme</h1>
+<h2 id="symbols">Symbols</h2>
+<p>Lists and numbers are the most commonly used data types in Scheme but there are others.</p>
+<p>Scheme (and Lisp) have a data type <code>symbol</code>. The tutorials explanation of this is poor.</p>
+<p>I think it goes something like this.</p>
+<p>Imagine a separate name space for symbols. It could be just a simple list with <code>car</code> addressing the name of a symbol and <code>cdr</code> address the next symbol. The symbol name is a string but, since it occurs only once in the name space list, its address is unique.</p>
+<p>Addresses may be compared as numbers, so comparison is O(1), whereas string comparison is O(n). Symbols are therefore convenient keys in associative lists and other data structure.</p>
+<p>I think that is all there is to it (although the internal implementation is probably not a list).</p>
+<p>A symbol may be created and referred to with:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    &#39;name                               <span class="co">; short-hand for (quote name)</span></code></pre>
+<p>The only snag seems to be symbols should be lower case.</p>
+<p>The symbols functions are:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">symbol?</span> x)                 <span class="co">; #t if x is a symbol</span>
+    (<span class="kw">string-&gt;symbol</span> str)        <span class="co">; convert string to symbol</span>
+    (<span class="kw">symbol-&gt;string</span> sym)        <span class="co">; convert symbol to string</span></code></pre>
+<p>The tutorial example of symbol use is was word counting program. I rephrased it to process the file a word at a time, incidentally eliminating the long list of words. My rephrasing is in <a href="../scm/lesson12-example1.scm">lesson12-example1.scm</a>.</p>
+</body>
+</html>
+
+
