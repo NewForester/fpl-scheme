@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+    <!-- scheme notes by NewForester is licensed under a Creative Commons Attribution-ShareAlike 4.0 International Licence. -->
+<head>
+    
+<meta charset="UTF-8" /> <meta name="description" content="Notes on the Yet Another Scheme Introduction tutorial" /> <meta name="keywords" content="Scheme" /> <meta name="author" content="NewForester" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <link rel="stylesheet" href="../styles/style-sheet.css" />
+<title>
+Scheme Notes: Defining Syntax
+</title>
+</head>
+
+<body>
+<h1 id="scheme">Scheme</h1>
+<h2 id="defining-syntax">Defining Syntax</h2>
+<p>The proposition here is that Scheme offers a very powerful macro facility that allows programmers to define their own syntax.</p>
+<p>A macro may be thought of as a transformation of source code before it is evaluated or compiled.</p>
+<p>A good number of the operations already described are, in fact, macros, not functions.</p>
+<p>In Scheme, simple macros may be defined using <code>syntax-rules</code>, which is defined R<sub>5</sub>RS. This mechanism is easier than the equivalent in Common Lisp for simple macros but a lot harder for complex ones.</p>
+<p>A simple example:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">define-syntax</span><span class="fu"> nil</span>!
+      (<span class="kw">syntax-rules</span> ()
+        ((_ x)
+          (set! x &#39;()))))</code></pre>
+<p>The second formal parameter of <code>syntax-rules</code> is a list of pairs of 'before' and 'after' expressions with '_' standing for the name of the macro.</p>
+<p>What the simple example transforms:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (nil! x)                            <span class="co">; before transformation</span>
+
+    (set! x &#39;())                        <span class="co">; after transformation</span></code></pre>
+<p>The macro <code>nil!</code> cannot be written as a function because altering the value of an actual parameter is a side affect that functions are not permitted.</p>
+<p>Another simple example:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">define-syntax</span><span class="fu"> when</span>
+      (<span class="kw">syntax-rules</span> ()
+        ((_ predicate b1 ...)
+          (<span class="kw">if</span> predicate (<span class="kw">begin</span> b1 ...)))))</code></pre>
+<p>Here ... represents an arbitrary number of expressions.</p>
+<p>The tutorial claims <code>when</code> cannot be written as a function because <code>if</code> is a special form but does not explain why. I think it is this. <code>if</code> is a special form that deliberately does not evaluate all its arguments. The macro does not evaluate any arguments but a function evaluates them all.</p>
+<p>Here are two more potentially useful macros:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">define-syntax</span><span class="fu"> while</span>
+      (<span class="kw">syntax-rules</span> ()
+        ((_ predicate b1 ...)
+          (<span class="kw">let</span> loop () (<span class="kw">if</span> predicate (<span class="kw">begin</span> b1 ... (loop)))))))
+
+    (<span class="kw">define-syntax</span><span class="fu"> for</span>
+      (<span class="kw">syntax-rules</span> ()
+        ((_ (ii from to) b1 ...)
+          (<span class="kw">let</span> loop((ii from)) (<span class="kw">if</span> (<span class="kw">&lt;</span> ii to) (<span class="kw">begin</span> b1 ... (loop (<span class="kw">+</span> ii <span class="dv">1</span>))))))))</code></pre>
+<p>Here b1 ... are evaluated for each iteration, whereas, with a function, they would be evaluated once before the call.</p>
+<hr />
+
+<p>The second formal parameter of <code>syntax-rules</code> is just the first of any arbitrary number of substitutions. The macro substitutes the first matching pattern:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">define-syntax</span><span class="fu"> inc</span>
+      (<span class="kw">syntax-rules</span> ()
+        ((_ x) (<span class="kw">begin</span> (set! x (<span class="kw">+</span> x <span class="dv">1</span>)) x))
+        ((_ x ii) (<span class="kw">begin</span> (set! x (<span class="kw">+</span> x ii)) x))))
+
+    (inc ii)            <span class="co">; increment ii (by 1)</span>
+    (inc ii jj)         <span class="co">; increment ii by jj)</span></code></pre>
+<p>Macros can substitute recursive code and that code may involve recursive macro substitution.</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">define-syntax</span><span class="fu"> my-and</span>
+      (<span class="kw">syntax-rules</span> ()
+        ((_) <span class="dv">#t</span>)
+        ((_ e) e)
+        ((_ e1 e2 ...)
+          (<span class="kw">if</span> e1
+            (my-and e2 ...)
+            <span class="dv">#f</span>))))
+
+    (<span class="kw">define-syntax</span><span class="fu"> my-or</span>
+      (<span class="kw">syntax-rules</span> ()
+        ((_) <span class="dv">#f</span>)
+        ((_ e) e)
+        ((_ e1 e2 ...)
+          (<span class="kw">if</span> e1
+            <span class="dv">#t</span>
+            (my-or e2 ...)))))</code></pre>
+<p>The <code>and</code> and <code>or</code> of Scheme have similar definitions.</p>
+<p>The first formal parameter of <code>syntax-rules</code> is a list of 'reserved words'.</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">define-syntax</span><span class="fu"> my-cond</span>
+      (<span class="kw">syntax-rules</span> (<span class="kw">else</span>)
+        ((_ (<span class="kw">else</span> e1 ...))
+         (<span class="kw">begin</span> e1 ...))
+        ((_ (e1 e2 ...))
+         (<span class="kw">if</span> e1 (<span class="kw">begin</span> e2 ...)))
+        ((_ (e1 e2 ...) c1 ...)
+         (<span class="kw">if</span> e1 (<span class="kw">begin</span> e2 ...) (my-cond c1 ...)))))</code></pre>
+<p>This appears to mean 'words' in the 'before' expression that are not to be substituted.</p>
+<hr />
+
+<p>Scheme also has <code>let-syntax</code> and <code>letrec-syntax</code> whose use is similar to <code>define-syntax</code> but no examples are given.</p>
+<p>Scheme also has <code>sc-macro-transformer</code> available for more complex macros. This provides a mechanism similar to that of Common Lisp.</p>
+<p>The tutorial example suggests that this is the basis of the implementation of structures and the automatic generation of accessors and setters.</p>
+<hr />
+
+</body>
+</html>
+
+
