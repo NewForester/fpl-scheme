@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+    <!-- scheme notes by NewForester is licensed under a Creative Commons Attribution-ShareAlike 4.0 International Licence. -->
+<head>
+    
+<meta charset="UTF-8" /> <meta name="description" content="Notes on the Yet Another Scheme Introduction tutorial" /> <meta name="keywords" content="Scheme" /> <meta name="author" content="NewForester" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <link rel="stylesheet" href="../styles/style-sheet.css" />
+<title>
+Scheme Notes: Continuations
+</title>
+</head>
+
+<body>
+<h1 id="scheme">Scheme</h1>
+<h2 id="continuations">Continuations</h2>
+<p>Continuations are a term I am not familiar with not having done Computer Science at school.</p>
+<p>The tutorial thinks it is a difficult concept to grasp. The example I find easiest to grasp is the execution context that the OS stores when switching tasks or processes: The context that needs to be stored in order to resume (continue) execution of the task or process later is called the continuation.</p>
+<p>Continuations may also used for co-routines, generators, callbacks and exception handling.</p>
+<p>Scheme recognises a continuation as a data type. Scheme defines a continuation as the calculation that needs to be performed before returning to the top-level.</p>
+<p>It is related to the concept of 'closure' used in other functional languages but I am not sure that they are the same.</p>
+<hr /><!-- The Continuation Passing Style -->
+
+<p>The tutorial talks of Continuation Passing Style (CPS). This first emerged from Scheme in 1975. It is in contrast to the more usual Direct Passing Style.</p>
+<p>Essentially, with CPS, each function has an extra parameter, which is a function that takes a single value. Functions do not return but rather call this extra parameter, passing it the result they would otherwise return.</p>
+<p>Here is a simple example:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">define</span><span class="fu"> </span>(return x)
+      x)
+
+    (<span class="kw">define</span><span class="fu"> </span>(k+ a b k)
+      (k (<span class="kw">+</span> a b)))
+
+    (<span class="kw">define</span><span class="fu"> </span>(k* a b k)
+      (k (* a b)))      <span class="co">; *)</span>
+
+    (k+ <span class="dv">1</span> <span class="dv">2</span> (<span class="kw">lambda</span> (x) (k* x <span class="dv">3</span> return)))
+
+    <span class="co">; is equivalent to</span>
+
+    (* (<span class="kw">+</span> <span class="dv">1</span> <span class="dv">2</span>) <span class="dv">3</span>)      <span class="co">; *)</span></code></pre>
+<p>The function k+ adds its first two parameters and calls the lambda function with its result. The lambda function calls k* which multiplies its first two parameters and calls return, which puts us out of our misery.</p>
+<p>What is remarked about the CPS is that the expression is inside out with respect to the conventional expression.</p>
+<hr /><!-- Recursive functions in CPS -->
+
+<p>An example of recursion using the CPS style:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    <span class="co">;;; normal factorial</span>
+    (<span class="kw">define</span><span class="fu"> </span>(fact n)
+      (<span class="kw">if</span> (<span class="kw">=</span> n <span class="dv">1</span>)
+        <span class="dv">1</span>
+        (* n (fact (<span class="kw">-</span> n <span class="dv">1</span>))))) <span class="co">; *)</span>
+
+    <span class="co">;;; CPS factorial</span>
+    (<span class="kw">define</span><span class="fu"> </span>(kfact n k)
+      (<span class="kw">if</span> (<span class="kw">=</span> n <span class="dv">1</span>)
+        (k <span class="dv">1</span>)
+        (kfact (<span class="kw">-</span> n <span class="dv">1</span>) (<span class="kw">lambda</span> (x) (k (* n x)))))) <span class="co">; *)</span></code></pre>
+<p>CPS is not useful for simple functions and even for complex function it is cumbersome.</p>
+<hr /><!-- Exceptions in CPS -->
+
+
+<p>In a very real sense, with CPS, where to 'return' is passed explicitly to each function.</p>
+<p>Exceptions can be programmed by passing two alternative 'return' points, one for success, the other for fail.</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">define</span><span class="fu"> </span>(non-number-value-error x)
+      (<span class="kw">display</span> <span class="st">&quot;Value error: &quot;</span>)
+      (<span class="kw">display</span>  x)
+      (<span class="kw">display</span> <span class="st">&quot; is not number.&quot;</span>)
+      (<span class="kw">newline</span>)
+      &#39;error)
+
+
+    (<span class="kw">define</span><span class="fu"> </span>(kproduct ls k k-value-error)
+      (<span class="kw">let</span> ((<span class="kw">break</span> k))
+        (<span class="kw">let</span> loop ((ls ls) (k k))
+          (<span class="kw">cond</span>
+           ((<span class="kw">null?</span> ls) (k <span class="dv">1</span>))
+           ((<span class="kw">not</span> (<span class="kw">number?</span> (<span class="kw">car</span> ls))) (k-value-error (<span class="kw">car</span> ls)))
+           ((<span class="kw">zero?</span> (<span class="kw">car</span> ls)) (<span class="kw">break</span> <span class="dv">0</span>))
+           (<span class="kw">else</span> (loop (<span class="kw">cdr</span> ls) (<span class="kw">lambda</span> (x) (k (* (<span class="kw">car</span> ls) x)))))))))   <span class="co">; *)</span></code></pre>
+<p>Here the alternative 'return' is <code>k-value-error</code> and is called when a non-number is encountered. The non-number is passed to <code>k-value-error</code>.</p>
+<p>Also note that for convenience the initial good 'return' is saved in <code>break</code> allowing an immediate exit with the result 0 should a 0 be encountered.</p>
+<p>The tricky part remains the normal execution, which is essentially a sequence of incomplete multiplications that all pancake when the last element of the list is reached.</p>
+<hr /><!-- Scheme Continuations -->
+
+<p>Apparently the examples above show that a continuation is also a 'chain of closure'. What ?</p>
+<p>At every stage of execution there existing an implicit continuation.</p>
+<p>In Scheme, a continuation is a first class object. The current continuation may be instantiated by calling <code>call-with-current-continuation</code>, which is usually abbreviated:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">define</span><span class="fu"> call/cc </span><span class="kw">call-with-current-continuation</span>)</code></pre>
+<p>This <code>call-with-current-continuation</code> function takes a single parameter that is itself a function that takes a single parameter that is the current continuation.</p>
+<p>Until you are comfortable with continuations, the result may be unexpected.</p>
+<p>Consider (the misleading expressions):</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (* <span class="dv">3</span> (<span class="kw">call/cc</span> (<span class="kw">lambda</span> (k) (<span class="kw">+</span> <span class="dv">1</span> <span class="dv">2</span>))))        <span class="co">; *) ⇒ 9</span>
+    (* <span class="dv">3</span> (<span class="kw">call/cc</span> (<span class="kw">lambda</span> (k) (<span class="kw">+</span> <span class="dv">1</span> (k <span class="dv">2</span>)))))    <span class="co">; *) ⇒ 6</span></code></pre>
+<p>Here <code>k</code> is the continuation that is passed to the lambda function.</p>
+<p>In the first case, <code>k</code> is not used by the lambda function so what is evaluated as <code>(* 3 (+ 1 2)</code>, <!-- *) --> which yields 9.</p>
+<p>In the second case, <code>k</code> is evaluated and 'returns' 2 to the top level so what is evaluated is <code>(* 3 2)</code>, <!-- *) --> which yields 6.</p>
+<p>Since continuations are first class, they may be saved and reused:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">define</span><span class="fu"> add4</span>)
+      (<span class="kw">+</span> <span class="dv">4</span> (<span class="kw">call/cc</span> (<span class="kw">lambda</span> (k)
+        (set! add4 k)
+        <span class="dv">0</span>)))</code></pre>
+<p>This defines a continuation that can be used to add 4. Defining the continuation seems to require the evaluation of (+ 4 x), hence the dummy 0 at the end (because call/cc return nothing ?).</p>
+<p>I seriously do not grok this - the parentheses appear wrong to me.</p>
+<p>How is this different from an ordinary function that adds 4 ? It returns to the top level so the evaluation of any enclosing S-expression stops:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">+</span> <span class="dv">100</span> (add4 <span class="dv">10</span>))                   <span class="co">; ⇒ 14, not 114</span></code></pre>
+<p>This return to the top level is very different from what I read described for Elm.</p>
+<hr /><!-- Returning to the Top Level -->
+
+<p>Returning to the top level can be put to good use in recursive functions:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">define</span><span class="fu"> </span>(find-leaf obj tree)
+      (<span class="kw">call/cc</span>
+        (<span class="kw">lambda</span> (cc)
+          (<span class="kw">letrec</span> ((iter
+            (<span class="kw">lambda</span> (tree)
+              (<span class="kw">cond</span>
+                ((<span class="kw">null?</span> tree) <span class="dv">#f</span>)
+                ((<span class="kw">pair?</span> tree)
+                  (iter (<span class="kw">car</span> tree))
+                  (iter (<span class="kw">cdr</span> tree)))
+                (<span class="kw">else</span>
+                  (<span class="kw">if</span> (<span class="kw">eqv?</span> obj tree)
+                    (cc obj)))))))
+            (iter tree)))))</code></pre>
+<p>This function searches a binary tree for <code>obj</code>. When it find <code>obj</code>, <code>(cc obj)</code> invokes the continuation established at the start. This throws <code>obj</code>, so returning from the tree search in one action.</p>
+<p>Returning to the top level can be put to good use in breaking out of list processing when an error occurs:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    <span class="co">;; macro to enclose a block of code in a continuation</span>
+    (<span class="kw">define-syntax</span><span class="fu"> block</span>
+      (<span class="kw">syntax-rules</span> ()
+        ((_ tag e1 ...)
+          (<span class="kw">call-with-current-continuation</span>
+          (<span class="kw">lambda</span> (tag)
+            e1 ...)))))
+
+    <span class="co">;; normally map will return list of square roots</span>
+    <span class="co">;; but when passed a wobbly like -2 in the middle</span>
+    <span class="co">;; this block will return the wobbly value</span>
+    (block <span class="kw">break</span>
+      (map
+        (<span class="kw">lambda</span> (x)
+          (<span class="kw">if</span> (<span class="kw">positive?</span> x)
+            (<span class="kw">sqrt</span> x)
+            (<span class="kw">break</span> x)))
+        &#39;(<span class="dv">1</span> -<span class="dv">2</span> <span class="dv">3</span>)))</code></pre>
+<p>Note that here <code>break</code> is a name with no significance to the language.</p>
+<hr /><!-- Generator Functions -->
+
+<p>A generator returns the next item (of a list) each time it is invoked by creating the item on the fly. This avoids the possibly expensive up front creation of long lists.</p>
+<p>Scheme continuations may be used to implement generators: with each call the continuation picks up where the last one left off. Each call involves the creation a new continuation.</p>
+<p>Here the leaves of a binary tree are returned one-by-one, one for each call to the function.</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">define</span><span class="fu"> </span>(leaf-generator tree)
+      (<span class="kw">let</span> ((return &#39;()))
+        (<span class="kw">letrec</span>
+          ((<span class="kw">continue</span>
+            (<span class="kw">lambda</span> ()
+              (<span class="kw">let</span> loop ((tree tree))
+                (<span class="kw">cond</span>
+                  ((<span class="kw">null?</span> tree) &#39;skip)
+                  ((<span class="kw">pair?</span> tree) (loop (<span class="kw">car</span> tree)) (loop (<span class="kw">cdr</span> tree)))
+                  (<span class="kw">else</span>
+                    (<span class="kw">call/cc</span> (<span class="kw">lambda</span> (lap-to-go)
+                      (set! <span class="kw">continue</span> (<span class="kw">lambda</span> () (lap-to-go &#39;restart)))
+                      (return tree))))))
+                (return &#39;()))))
+          (<span class="kw">lambda</span> ()
+            (<span class="kw">call/cc</span>
+              (<span class="kw">lambda</span> (where-to-go)
+                (set! return where-to-go)
+                (<span class="kw">continue</span>)))))))</code></pre>
+<p>On first examination, I think that <code>'skip</code> and <code>'restart</code> are just place-holders because the continuation syntax requires a parameter. They are symbols with names chosen to be helpful but without a good explanation they are just plain confusing.</p>
+<p>On second examination, the continuations are named <code>return</code> and <code>continue</code>. The first is the 'found it, get me out of here quick' trick of <code>find-leaf</code> example above. The second is where to resume. This bit is not obvious at all.</p>
+<p>The <code>letrec</code> statement initialises <code>continue</code> with the 'initial state' continuation and later on the <code>set!</code> assigns it a new continuation for next time. What is at first baffling is how <code>continue</code> is not re-initialised next time. The answer is not here but in the caller:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    <span class="co">;;; Define a little binary tree</span>
+    (<span class="kw">define</span><span class="fu"> tr </span>&#39;((<span class="dv">1</span> <span class="dv">2</span>) (<span class="dv">3</span> (<span class="dv">4</span> <span class="dv">5</span>))))
+
+    <span class="co">;;; Define a little generator</span>
+    (<span class="kw">define</span><span class="fu"> p </span>(leaf-generator tr))</code></pre>
+<p>Here <code>p</code> is the generator. When it is defined, <code>(leaf-generator tr)</code> is evaluated and <code>continue</code> is initialised. Later, each time <code>p</code> is re-evaluated, <code>(leaf-generator tr)</code> is not: it is just run. So whatever value <code>continue</code> had last time it still current and the whole thing works. Ouch !</p>
+<hr /><!-- Coroutines -->
+
+<p>Coroutines are routines that executed in parallel but one at a time. Coroutine pass control by yielding the processor rather than calling each other.</p>
+<p>Using the FIFO queue from earlier (see chapter 10 - Assignment), here is an implementation of coroutines based on continuations:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">define</span><span class="fu"> process-queue </span>(make-queue))
+
+    (<span class="kw">define</span><span class="fu"> </span>(coroutine thunk)
+      ( enqueue! process-queue thunk))
+
+    (<span class="kw">define</span><span class="fu"> </span>(start)
+       ((dequeue! process-queue)))
+
+    (<span class="kw">define</span><span class="fu"> </span>(pause)
+      (<span class="kw">call/cc</span>
+        (<span class="kw">lambda</span> (k)
+          (coroutine (<span class="kw">lambda</span> () (k <span class="dv">#f</span>)))
+          (start))))</code></pre>
+<p>Apparently simple and straight forward. It is interesting that the dequeue action seems to resume execution implicitly. It does not ... the extra pair of parentheses evaluate the result of the dequeue action.</p>
+<p>Here is a simple example of use:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">define</span><span class="fu"> </span>(flash onoff)
+      (<span class="kw">begin</span>
+        (<span class="kw">display</span> onoff)
+        (<span class="kw">display</span> <span class="st">&quot; &quot;</span>)))
+
+    (<span class="kw">define</span><span class="fu"> </span>(eg nn onoff)
+      (<span class="kw">let</span> loop ((ii <span class="dv">0</span>))
+        (<span class="kw">if</span> (<span class="kw">&lt;</span> ii nn)
+          (<span class="kw">begin</span>
+            (flash onoff)
+            (pause)
+            (loop (<span class="dv">1</span>+ ii))))))
+
+    (coroutine (<span class="kw">lambda</span> () (eg <span class="dv">10</span> <span class="dv">0</span>)))
+    (coroutine (<span class="kw">lambda</span> () (eg <span class="dv">10</span> <span class="dv">1</span>)))
+
+    (<span class="kw">newline</span>)
+    (start)</code></pre>
+<hr />
+
+</body>
+</html>
+
+
