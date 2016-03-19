@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+    <!-- scheme notes by NewForester is licensed under a Creative Commons Attribution-ShareAlike 4.0 International Licence. -->
+<head>
+    
+<meta charset="UTF-8" /> <meta name="description" content="Notes on the Yet Another Scheme Introduction tutorial" /> <meta name="keywords" content="Scheme" /> <meta name="author" content="NewForester" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <link rel="stylesheet" href="../styles/style-sheet.css" />
+<title>
+Scheme Notes: Lazy Evaluation
+</title>
+</head>
+
+<body>
+<h1 id="scheme">Scheme</h1>
+<h2 id="lazy-evaluation">Lazy Evaluation</h2>
+<p>Reference: <a href="http://www.md.chalmers.se/~rjmh/Papers/whyfp.html">Why Functional Programming Matters</a>.</p>
+<p>Haskell is the champion of lazy evaluation. Scheme has only partial support for the concept and the examples given imply that it is all about numerical approximation using infinite series.</p>
+<p>This is not quite what I was expecting but then I am not from a universe without side affects.</p>
+<p>In Scheme, the not-evaluated-yet state is called a <code>promise</code>.</p>
+<p>The following three operations provide the basis of lazy evaluation in Scheme:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (delay proc)        <span class="co">; do not evaluate proc but turn it into a promise</span>
+
+    (promise? obj)      <span class="co">; true if obj is a promise</span>
+
+    (<span class="kw">force</span> promise)     <span class="co">; calculate a value from the promise</span></code></pre>
+<p>A promise is not consumed by <code>force</code> ... you can call it repeatedly to get successive values. At this stage a promise looks a lot like a generator.</p>
+<p>These primitives can be defined and used to construct the basis for handling infinite sequences:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (lazy-car ls)                       <span class="co">; car for a lazy list</span>
+    (lazy-cdr ls)                       <span class="co">; cdr for a lazy list</span>
+    (lazy-cons obj next)                <span class="co">; cons for a lazy list</span>
+    (lazy-map proc ls ...)              <span class="co">; map for a lazy list</span>
+    (lazy-filter pred ls)               <span class="co">; filter for a lazy list</span>
+    (lazy-ref ls nn)                    <span class="co">; return nth element of a lazy list</span>
+    (lazy-head ls nn                    <span class="co">; return first n elements of a lazy list</span></code></pre>
+<p>All but <code>lazy-cons</code> are functions. <code>lazy-cons</code> invokes <code>(delay ...)</code> and <code>lazy-cdr</code> invokes <code>(force (cdr ...))</code> but the others are all straight forward.</p>
+<p>These primitives allow the definition of infinite lists with items in the list only being evaluated as and when required. How it seems to differ from a generator is that a generator evaluates and returns successive values one at a time while this lazy evaluation evaluates the first nn values in one go.</p>
+<p>Using this as a base, it is simple to define infinite arithmetic and geometric sequences:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    <span class="co">;;;;  sequences</span>
+
+    <span class="co">;;; infinite sequences represented by a_(n+1) = f(a_n)</span>
+    (<span class="kw">define</span><span class="fu"> </span>(inf-seq a0 f)
+      (lazy-cons a0 (inf-seq (f a0) f)))
+
+    <span class="co">;;; arithmetic sequence</span>
+    (<span class="kw">define</span><span class="fu"> </span>(ari a0 d)
+      (inf-seq a0 (<span class="kw">lambda</span> (x) (<span class="kw">+</span> x d))))
+
+    <span class="co">;;; geometric sequence</span>
+    (<span class="kw">define</span><span class="fu"> </span>(geo a0 r)
+      (inf-seq a0 (<span class="kw">lambda</span> (x) (* x r)))) <span class="co">; *)</span></code></pre>
+<p>A simple example of use:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">define</span><span class="fu"> ar1 </span>(ari <span class="dv">1</span> <span class="dv">1</span>))
+    <span class="co">;;Value: ar1</span>
+
+    (lazy-head ar1 <span class="dv">10</span>)
+    <span class="co">;;Value 15: (1 2 3 4 5 6 7 8 9 10)</span>
+
+    (lazy-head (lazy-filter <span class="kw">even?</span> ar1) <span class="dv">10</span>)
+    <span class="co">;;Value 16: (2 4 6 8 10 12 14 16 18 20)</span></code></pre>
+<p>A less straight forward example is the Fibonacci series:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">define</span><span class="fu"> fib</span>
+      (lazy-cons <span class="dv">1</span>
+        (lazy-cons <span class="dv">1</span>
+          (lazy-map <span class="kw">+</span> fib (lazy-cdr fib)))))</code></pre>
+<p>I am baffled by this: to me the parentheses appear to be in the wrong place.</p>
+<p>The tutorial then continues with examples of:</p>
+<ul>
+<li>Newton-Raphson method for finding the square root of n</li>
+<li>numerical differentiation</li>
+<li>numerical integration</li>
+</ul>
+<p>The second two rely on a 'convergent acceleration function', which, the tutorial claims, is easier to implement in Scheme than it is in a conventional programming language.</p>
+<p>I grasp all the parts used to construct the Newton-Raphson method even though I don't remember the method itself. Leaving out the 'convergent acceleration function', I grasp what the numerical differentiation and integration examples are doing. Perhaps I have never met the 'convergent acceleration function'. I certainly do not see what it is doing.</p>
+<p>There seems to be a lot of lazy evaluation. It is not clear whether, for each iteration, the next term of each of a several infinite series are evaluated or whether there are infinite series within infinite series each subject to lazy evaluation.</p>
+<p>The code ought to make sense (but run with infinite loops) without the lazy evaluation. Not for me it doesn't. I suspect this means that I am still not familiar enough with the Scheme programming language to be able reap the benefits of 'simpler to reason about' that is claimed.</p>
+<hr />
+</body>
+</html>
+
+
