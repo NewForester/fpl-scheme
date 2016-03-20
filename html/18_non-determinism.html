@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+    <!-- scheme notes by NewForester is licensed under a Creative Commons Attribution-ShareAlike 4.0 International Licence. -->
+<head>
+    
+<meta charset="UTF-8" /> <meta name="description" content="Notes on the Yet Another Scheme Introduction tutorial" /> <meta name="keywords" content="Scheme" /> <meta name="author" content="NewForester" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <link rel="stylesheet" href="../styles/style-sheet.css" />
+<title>
+Scheme Notes: Non-determinism
+</title>
+</head>
+
+<body>
+<h1 id="scheme">Scheme</h1>
+<h2 id="non-determinism">Non-determinism</h2>
+<p>The tutorial clams that non-determinism suites logical programming. The tutorial might make a lot more sense if the chapter was called Logical Programming and suggested that a valid approach to logical programming is pseudo non-determinism.</p>
+<p>A <a href="https://en.wikipedia.org/wiki/Nondeterministic_algorithm">Non-deterministic Algorithm</a> is an algorithm than may return a different result, even for the same input. This sounds like very opposite of pure functional programming and it is not what is mean here.</p>
+<p><a href="https://en.wikipedia.org/wiki/Nondeterministic_programming">Non-deterministic Programming</a> is a programming form where a program encounters 'choice points'. These represent program flow alternatives (as do if-then-else statements) but the choice is determined at run-time by some general mechanism (such as a virtual tossing of a coin).</p>
+<p>One method of choice is known as backtracking: the chosen 'alternative' may fail causing the program to backtrack and try other 'alternatives'. This is what is considered in this chapter. I see this a deterministic but, heck, what do I know.</p>
+<p>Since backtracking implies restoring the state of choice points, languages that implement continuations are particularly suited to this method.</p>
+<p>The chapter considers the <code>amb</code> evaluator. This is a special form that is not part of the standard MIT-Scheme.</p>
+<p>The <code>amb</code> evaluator chooses to evaluate one from a set of expressions &quot;ambiguously&quot;:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (amb exp1 exp2 ...)</code></pre>
+<p>If the list of expression has just one expression, then it has no choice but to evaluate than expression. If the list is empty, the evaluation is said to 'fail'.</p>
+<p>In practice <code>amb</code> does not choose &quot;ambiguously&quot; but &quot;systematically&quot;. Deterministic choice points substitute for non-deterministic ones. Thus:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">list</span> (amb <span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>) (amb &#39;a &#39;b))</code></pre>
+<p>would return all six possible values in the same order every time.</p>
+<p>Turn this around, <code>amb</code> can be used to search a tree structure for an item that matches and arbitrary condition. In principle, you do not care which item it returns but in practice it will always return the same one.</p>
+<p>How is this different from any other systematic search ? I am not sure other than the backtracking is automagical through its use of continuations. Perhaps the point is that you don't have to write the code to do the systematic search and can concentrate on expressing the (real world) problem rather than the (programming language specific) solution.</p>
+<p>Let us now consider the tutorial.</p>
+<p>The following will return a pair of numbers whose sum is a prime number:</p>
+<pre class="sourceCode scheme"><code class="sourceCode scheme">    (<span class="kw">let</span> ((i (amb <span class="dv">4</span> <span class="dv">6</span> <span class="dv">7</span>)) (j (amb <span class="dv">5</span> <span class="dv">8</span> <span class="dv">11</span>)))
+      (<span class="kw">if</span> (prime? (<span class="kw">+</span> i j))
+        (<span class="kw">list</span> i j)
+        (amb)))</code></pre>
+<p>How do we get here ?</p>
+<p>This, I think, is the inspiration: <a href="https://mitpress.mit.edu/sicp/full-text/book/book-Z-H-28.html#%_sec_4.3.1">Amb and Search</a>. In this, <code>amb</code> is a special form. It is not present in MIT-Scheme. At least not the version I downloaded.</p>
+<p>The tutorial instead implements it as a function and then as a macro.</p>
+<p>Our copy of the function implementation and example are in <a href="../scm/lesson18-example1.scm">lesson18-example1.scm</a>. It is a bit gauche: the use of a global variable and side effects; the need for <code>apply</code> and the call to <code>choice</code> inside <code>pythag</code> raise more questions than they answer.</p>
+<p>Our copy of the macro implementation and example are in <a href="../scm/lesson18-example2.scm">lesson18-example2.scm</a>. This is a slight improvement since S-expressions are handled properly. Perhaps the ugliness is inevitable unless you can implement <code>amb</code> as a special form.</p>
+<p>Next are four utilities for &quot;logical programming&quot;. I like the <code>assert</code> function. Given the substitution of &quot;systematically&quot; for &quot;ambiguously&quot;, I am not convinced the example offers any advantage over a generator. The use of one global variable <code>fail</code> by any number of functions concurrently looks very contrary to functional programming principles.</p>
+<p>The four utilities are then used to implement <code>prime?</code> and so implement the support required for the example given at the start of the chapter. See <a href="../scm/lesson18-example3.scm">lesson18-example3.scm</a>.</p>
+<p>The final school girl example is probably a classic logical programming exercise.</p>
+<p>The synthesis has been a long time coming. What we have here is a reasonably straight forward implementation that is easy to following provided you have grasped all the rest.</p>
+<p>A logic problem is something like a Suduko puzzle. There are rules or constraints (such as the sums down each column and across rows) - and there are facts - the numbers already given</p>
+<p>Logical programming is a way of programming solutions to logic problems by stating the facts and rules and allowing the programming language to find solutions that do not violate these.</p>
+<p>In our case here, by using the backtracking (&quot;systematic&quot;) <code>amb</code> implementation.</p>
+<p>The school girl example (<a href="../scm/lesson18-example4.scm">lesson18-example4.scm</a>) shows two implementations. The first implementation is apparently an order of magnitude faster than the second.</p>
+<p>The second implementations is a brute force algorithm that will consider all possibilities with five unknowns. The first implementations cuts down the number of possibilities by initially considering just two unknowns with one constraint, only going further for those possibilities that work for this simpler problem.</p>
+<p>Well, d'oh, you might think but for complex, real world problems, finding the short-cuts may not be so obvious.</p>
+<p>Note that the two implementations demonstrate that the algorithm is not entirely separate from the rules and facts as a pure logical programming language would require.</p>
+<hr />
+</body>
+</html>
+
+
