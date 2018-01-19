@@ -1,4 +1,4 @@
-; An implementation of the famous FizzBizz exercise in Scheme
+; An implementation of the famous FizzBuzz exercise in Scheme
 ; Copyright (C) 2017 NewForester
 ; Available under MIT Licence terms
 
